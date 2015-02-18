@@ -27,7 +27,8 @@ int main (int argc, char* argv[]) {
 	int count = 0;
 	char crdir[15];
 
-	for(;;ret = read(ctfd,create,1)) {
+	while(1) {
+		ret = read(ctfd,create,1);
 		//printf("%s %d\n",create,count);
 		if (ret < 0) {
 			perror("Failed to read from create");
