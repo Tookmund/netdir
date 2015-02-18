@@ -7,11 +7,9 @@
 
 #include "netsock.h"
 
-//for mkfifo()
 #include <sys/types.h>
 #include <sys/stat.h>
-
-//for chdir()
 #include <unistd.h>
+#include <fcntl.h>
 
 #endif
