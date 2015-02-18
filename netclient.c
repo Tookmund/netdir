@@ -1,66 +1,69 @@
 #include "netdir.h"
 #include "netsock.h"
 
-void test(int ret) {
+//maximum url size plus max port size
+#define MAX_URL (2000+65535)
+
+void test(int ret,char* mess) {
 	if (ret < 0) {
-		perror("");
+		perror(mess);
 	}
 }
 int main (int argc, char* argv[]) {
 	if (argc < 2) return 0;
 
 	int ret = chdir(argv[1]);
-	test(ret);
+	test(ret,"Unable to chdir");
 
-	ret = mkfifo("url",666);
-	test(ret);
+	ret = mkfifo("url",0666);
+	test(ret,"Unable to make url FIFO");
 	int url = open("url",O_RDWR);
-	test(url);
+	test(url,"Unable to open url FIFO");
 
-	ret = mkfifo("in",666);
-	test(ret);
+	ret = mkfifo("in",0666);
+	test(ret,"Unable to make input FIFO");
 	int in = open("in",O_RDWR);
-	test(in);
+	test(in,"Unable to open input FIFO");
 
-	ret = mkfifo("out",666);
-	test(ret);
+	ret = mkfifo("out",0666);
+	test(ret,"Unable to make output FIFO");
 	int out = open("out",O_RDWR);
-	test(out);
+	test(out,"Unable to open output FIFO");
 
-	int urlsize = 0;
-	char* urlbuf;
-	int rb;
-	int urlread = 1;
-	int separator = 0;
-
-	while (urlread) {
-		urlsize += 10;
-		//Read and process URL in format host:port
-		urlbuf  = (char*)malloc(urlsize);
-		//sizeof(char) == 1
-		rb = read(url,urlbuf,sizeof(urlbuf));
-		for (int i = 0;i<= urlsize;i++) {
-			if (urlbuf[i] == '\n') {
-				if ((i+1) <= urlsize) {
-					urlbuf[i+1] = '\0';
-					urlread = 0;
-				}
-			}
-			else if (urlbuf[i] == ':') {
-				separator = i;
-			}
+	char urlbuf[MAX_URL];
+	long separator = 0;
+	char urlread[5];
+	int fail = 1;
+	long urlsize;
+	while (fail) {
+		int rb = read(url,urlread,5);
+		test(rb,"Unable to read from URL FIFO");
+		printf("(%s)\n",urlread);
+		if (rb < 5) fail = 0;
+		strcat(urlbuf,urlread);
+	}
+	long i;
+	for(i = 0; i<= MAX_URL; i++) {
+		if(urlbuf[i] == ':') {
+			separator = i;
+		}
+		else if (urlbuf[i] == '\n' || urlbuf[i] == '\0') {
+			i = MAX_URL+1;
+			urlsize = i;
 		}
 	}
+	printf("(%s)\n",urlbuf);
 	char* host = (char*)malloc(separator+1);
 	strncat(host,urlbuf,separator);
-
-	char* port = (char*)malloc((urlsize-separator)+1);
-	int j = 0;
-	for (int i = separator; i <= urlsize;i++) {
-		port[j] = urlbuf[i];
+	printf("\n(%s)\n",host);
+	char* port = (char*)malloc((MAX_URL-separator)+1);
+	long j = 0;
+	long g = 0;
+	for (g = separator+1; g <= urlsize; g++) {
+		port[j] = urlbuf[g];
 		j++;
 	}
-
+	printf("(%s)\n",port);
 	int sfd = makesock(host,port,0);
 	char localbuf[2];
 
@@ -68,16 +71,16 @@ int main (int argc, char* argv[]) {
 		memset(localbuf,0,sizeof(localbuf));
 
 		ret = read(sfd,localbuf,1);
-		test(ret);
+		test(ret,"Unable to read from socket");
 
 		ret = write(out,localbuf,1);
-		test(ret);
+		test(ret,"Unable to write to out FIFO");
 
 		read(in,localbuf,1);
-		test(ret);
+		test(ret,"Unable to read from in FIFO");
 
 		write(sfd,localbuf,1);
-		test(ret);
+		test(ret,"Unable to write to socket");
 	}
 	return 0;
 }
