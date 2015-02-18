@@ -65,22 +65,21 @@ int main (int argc, char* argv[]) {
 	}
 	printf("(%s)\n",port);
 	int sfd = makesock(host,port,0);
-	char localbuf[2];
-
+	char*  localbuf = NULL;
+	size_t blank = 0;
+	FILE* socketfile = fdopen(sfd,"r");
+	FILE* infile = fdopen(in,"r");
 	while(1) {
-		memset(localbuf,0,sizeof(localbuf));
+		getline(&localbuf,&blank,socketfile);
+		printf("(%s)\n",localbuf);
+		ret = write(out,localbuf,sizeof(localbuf));
+		test(ret,"Unable to write to output");
 
-		ret = read(sfd,localbuf,1);
-		test(ret,"Unable to read from socket");
-
-		ret = write(out,localbuf,1);
-		test(ret,"Unable to write to out FIFO");
-
-		read(in,localbuf,1);
-		test(ret,"Unable to read from in FIFO");
-
-		write(sfd,localbuf,1);
-		test(ret,"Unable to write to socket");
+		free(localbuf);
+		getline(&localbuf,&blank,infile);
+		printf("(%s)\n",localbuf);
+		ret = write(sfd,localbuf,sizeof(localbuf));
+		free(localbuf);
 	}
 	return 0;
 }
