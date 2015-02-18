@@ -51,14 +51,12 @@ int main (int argc, char* argv[]) {
 				perror("Failed to fork");
 				break;
 			case 0:
-				printf("%d\n",count);
+				char* args[ ] = {"netclient",crdir};
+				execvp("netclient", args);
 				break;
 			default:
-				//char* argv[ ] = {"netclient",cte};
-				exit(0);
+				break;
 		}
-		printf("test");
 	}
-	//execvp()
 	return 0;
 }
