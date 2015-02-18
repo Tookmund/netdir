@@ -32,15 +32,15 @@ int main (int argc, char* argv[]) {
 
 	char urlbuf[MAX_URL];
 	long separator = 0;
-	char urlread[5];
+	char urlread[2];
 	int fail = 1;
 	long urlsize;
 	while (fail) {
-		int rb = read(url,urlread,5);
+		int rb = read(url,urlread,2);
 		test(rb,"Unable to read from URL FIFO");
 		printf("(%s)\n",urlread);
-		if (rb < 5) fail = 0;
-		strcat(urlbuf,urlread);
+		if (rb < 2) fail = 0;
+		else strcat(urlbuf,urlread);
 	}
 	long i;
 	for(i = 0; i<= MAX_URL; i++) {
@@ -52,7 +52,7 @@ int main (int argc, char* argv[]) {
 			urlsize = i;
 		}
 	}
-	printf("(%s)\n",urlbuf);
+	printf("\n\n(%s)\n\n",urlbuf);
 	char* host = (char*)malloc(separator+1);
 	strncat(host,urlbuf,separator);
 	printf("\n(%s)\n",host);
