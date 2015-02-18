@@ -1,14 +1,16 @@
 CC := gcc
 CFLAGS := -Wall -Werror -g
 
-CFILES := netsock.c  
-HEADERS := netsock.h netdir.h
+HEADERS := netdir.h
+
+NETHEADER := netsock.h
+NETFILES := netsock.c  
 
 all: netserver
 
 
-netserver: netserver.c $(CFILES) $(HEADERS)
-	$(CC) $(CFLAGS) -o netserver netserver.c $(CFILES)
+netserver: netserver.c $(HEADERS)
+	$(CC) $(CFLAGS) -o netserver netserver.c
 
 clean:
 	rm netserver
