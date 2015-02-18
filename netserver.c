@@ -46,12 +46,13 @@ int main (int argc, char* argv[]) {
 			continue;
 		}
 		count++;
+
+		char* args[ ] = { "netclient", crdir };
 		switch(fork()) {
 			case -1:
 				perror("Failed to fork");
 				break;
 			case 0:
-				char* args[ ] = {"netclient",crdir};
 				execvp("netclient", args);
 				break;
 			default:
