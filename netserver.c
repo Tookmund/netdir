@@ -53,7 +53,8 @@ int main (int argc, char* argv[]) {
 				perror("Failed to fork");
 				break;
 			case 0:
-				execvp("netclient", args);
+				printf("NetClient\n");
+				execv("../netclient", args);
 				break;
 			default:
 				break;
