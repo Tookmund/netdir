@@ -1,3 +1,4 @@
+### Status: Incomplete
 # NetDir
 Plan9-like net directory with FIFO's
 
